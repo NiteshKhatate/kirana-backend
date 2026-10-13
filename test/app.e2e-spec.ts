@@ -189,7 +189,7 @@ describe('Foundation HTTP (database mocked)', () => {
 
   it('does not expose unfinished domain APIs', async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/v1/auth/register')
+      .post('/api/v1/auth/login')
       .send({ password: 'private-body-password' })
       .expect(404);
     expect(response.body).toMatchObject({

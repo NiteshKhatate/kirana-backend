@@ -54,19 +54,21 @@ Completed 2026-10-13 after closing the Milestone 0 audit; files, endpoint contra
 **Exit gate:** predictable configuration, API docs and readiness checks; app boots after fresh install; baseline Jest works.
 
 ## Milestone 2 — Identity registration and email verification
-- [ ] Add Argon2id password hashing and minimal password policy.
-- [ ] Implement `POST /api/v1/auth/register` with trimmed/lowercased email, safe response, duplicate-email 409; create `User` plus hashed verification token safely.
-- [ ] Add development mail adapter and production SMTP adapter (no production link logging). Do not assume email delivery success when sending fails.
-- [ ] Implement `POST /api/v1/auth/verify-email` and `POST /api/v1/auth/resend-verification` with expiry, single-use consumption and resend rate limit.
-- [ ] Implement `GET /api/v1/auth/me` for a verified, authenticated user (can be completed after milestone 3).
-- [ ] Audit user sign-up events safely (without exposing raw tokens).
-- [ ] Unit tests for hashing, email normalization, duplicate registration, expired/used tokens, safe serialization.
-- [ ] Integration/e2e tests for register → verify.
+- [x] Add Argon2id password hashing and minimal password policy.
+- [x] Implement `POST /api/v1/auth/register` with trimmed/lowercased email, safe response, duplicate-email 409; create `User` plus hashed verification token safely.
+- [x] Add development mail adapter and production SMTP adapter (no production link logging). Do not assume email delivery success when sending fails.
+- [x] Implement `POST /api/v1/auth/verify-email` and `POST /api/v1/auth/resend-verification` with expiry, single-use consumption and resend rate limit.
+- [x] Implement `GET /api/v1/auth/me` for a verified, authenticated user; includes RS256 verification and current active/verified database status checks, with an explicit safe profile projection.
+- [x] Audit user sign-up events safely (without exposing raw tokens).
+- [x] Unit tests for hashing, email normalization, duplicate registration, expired/used tokens, safe serialization.
+- [x] Integration/e2e tests for register → verify.
+
+All Milestone 2 tasks completed 2026-10-13, including `/auth/me`. Its JWT verification prerequisite was brought forward; login/token issuance remains Milestone 3 work. Files, API contracts, checks and retry limitations: [Milestone 2 verification](milestone-2-verification.md). No schema migration required.
 
 **Exit gate:** a new user can register, verify email, and has no plaintext credential/token persisted.
 
 ## Milestone 3 — Login, JWT, refresh and recovery
-- [ ] Implement signing-key config (prefer RS256 for future service verification), issuer/audience/expiry validation and access JWT guard.
+- [ ] Complete signing-key configuration and token issuance/key rotation (prefer RS256); public-key config, issuer/audience/expiry validation and access JWT guard were completed with Milestone 2's `/auth/me` prerequisite.
 - [ ] Implement `POST /api/v1/auth/login` requiring verified, active account; use safe errors and rate limiting.
 - [ ] Implement `POST /api/v1/auth/refresh`: opaque random refresh token, hash in `RefreshSession`, atomic rotation, family-based replay handling, concurrent requests safe.
 - [ ] Implement `POST /api/v1/auth/logout`: revoke refresh session; document behavior of still-valid short-lived access tokens.

@@ -16,14 +16,25 @@ describe('Environment validation', () => {
   it('defaults the development port and returns typed configuration', () => {
     expect(
       validateEnvironment({ DATABASE_URL: development }, 'development'),
-    ).toEqual({
+    ).toMatchObject({
       NODE_ENV: 'development',
       PORT: 3001,
       DATABASE_URL: development,
     });
     expect(
       validateEnvironment(
-        { PORT: '8080', DATABASE_URL: production },
+        {
+          PORT: '8080',
+          DATABASE_URL: production,
+          EMAIL_FROM: 'no-reply@example.com',
+          VERIFY_EMAIL_URL: 'https://app.example.com/verify-email',
+          SMTP_HOST: 'smtp.example.com',
+          SMTP_USER: 'placeholder',
+          SMTP_PASSWORD: 'placeholder',
+          JWT_PUBLIC_KEY: process.env.JWT_PUBLIC_KEY,
+          JWT_ISSUER: 'kirana-identity',
+          JWT_AUDIENCE: 'kirana-api',
+        },
         'production',
       ).PORT,
     ).toBe(8080);

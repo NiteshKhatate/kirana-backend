@@ -20,3 +20,7 @@ docker-data/
 postgres-data/
 
 /generated/prisma
+
+# Local development email contains one-time verification links
+.local-mail/
+.keys/

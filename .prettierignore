@@ -5,3 +5,5 @@ generated/
 package-lock.json
 .env
 .env.*
+.local-mail/
+.keys/

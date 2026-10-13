@@ -20,6 +20,7 @@ export function configureApp(app: INestApplication): void {
     .setTitle('Kirana API')
     .setDescription('Kirana SaaS backend API')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .addGlobalParameters({
       name: 'x-request-id',
       in: 'header',

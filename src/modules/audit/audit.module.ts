@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { SecurityEvents } from './security-events.service';
 
-@Module({})
+@Module({ providers: [SecurityEvents], exports: [SecurityEvents] })
 export class AuditModule {}
