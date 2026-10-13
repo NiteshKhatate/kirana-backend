@@ -7,7 +7,7 @@
 - [x] Frontend setup complete (not part of this backend plan).
 - [x] NestJS backend starts locally and is wired to PostgreSQL in Docker.
 - [x] Prisma registration schema (11 business tables, 7 enums) imported and migration applied, as reported by user.
-- [ ] Verify current git status, package versions, compiled NestJS startup, actual `prisma migrate status`, `npx prisma validate`, and existing tests before coding.
+- [x] Verify current git status, package versions, compiled NestJS startup, actual `prisma migrate status`, `npx prisma validate`, and existing tests before coding. Completed 2026-10-13; repairs, command results and remaining findings are in [baseline verification](baseline-verification.md).
 
 **Scope note:** Phase 1 implements modular identity/tenant domains **within the one backend process** and `kirana_identity` DB. The `kirana_tenant` DB is reserved. Extracting separate deployable backend services is a future change and **not part of this plan** unless user explicitly changes scope. No POS, inventory, purchasing or reporting.
 
@@ -21,11 +21,13 @@
 
 ## Milestone 0 — Audit existing baseline
 **Work**
-- [ ] Inspect `package.json`, `package-lock.json`, `tsconfig.json`, `nest-cli.json`, `.env.example`, Docker Compose, Prisma schema + migration history, current controller and module layout.
-- [ ] Ensure NestJS packages have compatible majors and CommonJS/ESM settings match installed packages; avoid previously encountered `ERR_REQUIRE_ESM` mismatch.
-- [ ] Confirm `DATABASE_URL` points to the intended local **`kirana_identity`** DB; test DB has a different URL.
-- [ ] Validate and generate Prisma client; run baseline Jest and build; record results.
-- [ ] Set `.gitignore` for `.env`, `dist`, key material, logs, coverage; ensure lockfile tracked.
+- [x] Inspect `package.json`, `package-lock.json`, `tsconfig.json`, `nest-cli.json`, `.env.example`, Docker Compose, Prisma schema + migration history, current controller and module layout.
+- [x] Ensure NestJS packages have compatible majors and CommonJS/ESM settings match installed packages; avoid previously encountered `ERR_REQUIRE_ESM` mismatch.
+- [x] Confirm `DATABASE_URL` points to the intended local **`kirana_identity`** DB; test DB has a different URL.
+- [x] Validate and generate Prisma client; run baseline Jest and build; record results.
+- [x] Set `.gitignore` for `.env`, `dist`, key material, logs, coverage; ensure lockfile tracked.
+
+Completed 2026-10-13; exit-gate evidence and remaining non-failing findings: [Milestone 0 verification](milestone-0-verification.md).
 
 **Commands (Git Bash / from repo root):**
 ```bash
@@ -39,30 +41,34 @@ npm run build
 **Exit gate:** NestJS boots; health query reaches PostgreSQL; migrations show no pending drift/conflict; baseline build/tests pass or failures are documented and repaired.
 
 ## Milestone 1 — Foundation and config
-- [ ] Implement validated environment config, separated dev/test/prod values; no hardcoded secrets.
-- [ ] Configure `ValidationPipe` (whitelist, forbid unknown fields, transform).
-- [ ] Configure Swagger docs `/api/docs`, versioned prefix `/api/v1`.
-- [ ] Add consistent safe exception formatting, request correlation ID/logging and health endpoints.
-- [ ] Implement organized `AuthModule`, `UsersModule`, `OrganizationsModule`, `StoresModule`, `MembershipsModule`, `OnboardingModule`, `InvitationsModule`, `AuditModule` scaffolds without premature APIs.
-- [ ] Set up a dedicated integration-test database and test helpers; ensure tests cannot run against dev/prod DB.
-- [ ] Test startup config, DTO validation and health checks.
+- [x] Implement validated environment config, separated dev/test/prod values; no hardcoded secrets.
+- [x] Configure `ValidationPipe` (whitelist, forbid unknown fields, transform).
+- [x] Configure Swagger docs `/api/docs`, versioned prefix `/api/v1`.
+- [x] Add consistent safe exception formatting, request correlation ID/logging and health endpoints.
+- [x] Implement organized `AuthModule`, `UsersModule`, `OrganizationsModule`, `StoresModule`, `MembershipsModule`, `OnboardingModule`, `InvitationsModule`, `AuditModule` scaffolds without premature APIs.
+- [x] Set up a dedicated integration-test database and test helpers; ensure tests cannot run against dev/prod DB.
+- [x] Test startup config, DTO validation and health checks.
+
+Completed 2026-10-13 after closing the Milestone 0 audit; files, endpoint contracts, checks and remaining findings: [Milestone 1 verification](milestone-1-verification.md).
 
 **Exit gate:** predictable configuration, API docs and readiness checks; app boots after fresh install; baseline Jest works.
 
 ## Milestone 2 — Identity registration and email verification
-- [ ] Add Argon2id password hashing and minimal password policy.
-- [ ] Implement `POST /api/v1/auth/register` with trimmed/lowercased email, safe response, duplicate-email 409; create `User` plus hashed verification token safely.
-- [ ] Add development mail adapter and production SMTP adapter (no production link logging). Do not assume email delivery success when sending fails.
-- [ ] Implement `POST /api/v1/auth/verify-email` and `POST /api/v1/auth/resend-verification` with expiry, single-use consumption and resend rate limit.
-- [ ] Implement `GET /api/v1/auth/me` for a verified, authenticated user (can be completed after milestone 3).
-- [ ] Audit user sign-up events safely (without exposing raw tokens).
-- [ ] Unit tests for hashing, email normalization, duplicate registration, expired/used tokens, safe serialization.
-- [ ] Integration/e2e tests for register → verify.
+- [x] Add Argon2id password hashing and minimal password policy.
+- [x] Implement `POST /api/v1/auth/register` with trimmed/lowercased email, safe response, duplicate-email 409; create `User` plus hashed verification token safely.
+- [x] Add development mail adapter and production SMTP adapter (no production link logging). Do not assume email delivery success when sending fails.
+- [x] Implement `POST /api/v1/auth/verify-email` and `POST /api/v1/auth/resend-verification` with expiry, single-use consumption and resend rate limit.
+- [x] Implement `GET /api/v1/auth/me` for a verified, authenticated user; includes RS256 verification and current active/verified database status checks, with an explicit safe profile projection.
+- [x] Audit user sign-up events safely (without exposing raw tokens).
+- [x] Unit tests for hashing, email normalization, duplicate registration, expired/used tokens, safe serialization.
+- [x] Integration/e2e tests for register → verify.
+
+All Milestone 2 tasks completed 2026-10-13, including `/auth/me`. Its JWT verification prerequisite was brought forward; login/token issuance remains Milestone 3 work. Files, API contracts, checks and retry limitations: [Milestone 2 verification](milestone-2-verification.md). No schema migration required.
 
 **Exit gate:** a new user can register, verify email, and has no plaintext credential/token persisted.
 
 ## Milestone 3 — Login, JWT, refresh and recovery
-- [ ] Implement signing-key config (prefer RS256 for future service verification), issuer/audience/expiry validation and access JWT guard.
+- [ ] Complete signing-key configuration and token issuance/key rotation (prefer RS256); public-key config, issuer/audience/expiry validation and access JWT guard were completed with Milestone 2's `/auth/me` prerequisite.
 - [ ] Implement `POST /api/v1/auth/login` requiring verified, active account; use safe errors and rate limiting.
 - [ ] Implement `POST /api/v1/auth/refresh`: opaque random refresh token, hash in `RefreshSession`, atomic rotation, family-based replay handling, concurrent requests safe.
 - [ ] Implement `POST /api/v1/auth/logout`: revoke refresh session; document behavior of still-valid short-lived access tokens.
