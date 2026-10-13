@@ -7,7 +7,7 @@
 - [x] Frontend setup complete (not part of this backend plan).
 - [x] NestJS backend starts locally and is wired to PostgreSQL in Docker.
 - [x] Prisma registration schema (11 business tables, 7 enums) imported and migration applied, as reported by user.
-- [ ] Verify current git status, package versions, compiled NestJS startup, actual `prisma migrate status`, `npx prisma validate`, and existing tests before coding.
+- [x] Verify current git status, package versions, compiled NestJS startup, actual `prisma migrate status`, `npx prisma validate`, and existing tests before coding. Completed 2026-10-13; repairs, command results and remaining findings are in [baseline verification](baseline-verification.md).
 
 **Scope note:** Phase 1 implements modular identity/tenant domains **within the one backend process** and `kirana_identity` DB. The `kirana_tenant` DB is reserved. Extracting separate deployable backend services is a future change and **not part of this plan** unless user explicitly changes scope. No POS, inventory, purchasing or reporting.
 
@@ -21,11 +21,13 @@
 
 ## Milestone 0 — Audit existing baseline
 **Work**
-- [ ] Inspect `package.json`, `package-lock.json`, `tsconfig.json`, `nest-cli.json`, `.env.example`, Docker Compose, Prisma schema + migration history, current controller and module layout.
-- [ ] Ensure NestJS packages have compatible majors and CommonJS/ESM settings match installed packages; avoid previously encountered `ERR_REQUIRE_ESM` mismatch.
-- [ ] Confirm `DATABASE_URL` points to the intended local **`kirana_identity`** DB; test DB has a different URL.
-- [ ] Validate and generate Prisma client; run baseline Jest and build; record results.
-- [ ] Set `.gitignore` for `.env`, `dist`, key material, logs, coverage; ensure lockfile tracked.
+- [x] Inspect `package.json`, `package-lock.json`, `tsconfig.json`, `nest-cli.json`, `.env.example`, Docker Compose, Prisma schema + migration history, current controller and module layout.
+- [x] Ensure NestJS packages have compatible majors and CommonJS/ESM settings match installed packages; avoid previously encountered `ERR_REQUIRE_ESM` mismatch.
+- [x] Confirm `DATABASE_URL` points to the intended local **`kirana_identity`** DB; test DB has a different URL.
+- [x] Validate and generate Prisma client; run baseline Jest and build; record results.
+- [x] Set `.gitignore` for `.env`, `dist`, key material, logs, coverage; ensure lockfile tracked.
+
+Completed 2026-10-13; exit-gate evidence and remaining non-failing findings: [Milestone 0 verification](milestone-0-verification.md).
 
 **Commands (Git Bash / from repo root):**
 ```bash
@@ -39,13 +41,15 @@ npm run build
 **Exit gate:** NestJS boots; health query reaches PostgreSQL; migrations show no pending drift/conflict; baseline build/tests pass or failures are documented and repaired.
 
 ## Milestone 1 — Foundation and config
-- [ ] Implement validated environment config, separated dev/test/prod values; no hardcoded secrets.
-- [ ] Configure `ValidationPipe` (whitelist, forbid unknown fields, transform).
-- [ ] Configure Swagger docs `/api/docs`, versioned prefix `/api/v1`.
-- [ ] Add consistent safe exception formatting, request correlation ID/logging and health endpoints.
-- [ ] Implement organized `AuthModule`, `UsersModule`, `OrganizationsModule`, `StoresModule`, `MembershipsModule`, `OnboardingModule`, `InvitationsModule`, `AuditModule` scaffolds without premature APIs.
-- [ ] Set up a dedicated integration-test database and test helpers; ensure tests cannot run against dev/prod DB.
-- [ ] Test startup config, DTO validation and health checks.
+- [x] Implement validated environment config, separated dev/test/prod values; no hardcoded secrets.
+- [x] Configure `ValidationPipe` (whitelist, forbid unknown fields, transform).
+- [x] Configure Swagger docs `/api/docs`, versioned prefix `/api/v1`.
+- [x] Add consistent safe exception formatting, request correlation ID/logging and health endpoints.
+- [x] Implement organized `AuthModule`, `UsersModule`, `OrganizationsModule`, `StoresModule`, `MembershipsModule`, `OnboardingModule`, `InvitationsModule`, `AuditModule` scaffolds without premature APIs.
+- [x] Set up a dedicated integration-test database and test helpers; ensure tests cannot run against dev/prod DB.
+- [x] Test startup config, DTO validation and health checks.
+
+Completed 2026-10-13 after closing the Milestone 0 audit; files, endpoint contracts, checks and remaining findings: [Milestone 1 verification](milestone-1-verification.md).
 
 **Exit gate:** predictable configuration, API docs and readiness checks; app boots after fresh install; baseline Jest works.
 

@@ -1,33 +1,24 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
+import { configureApp } from './configure-app';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { abortOnError: false });
 
-  app.setGlobalPrefix('api/v1');
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
+  configureApp(app);
+  app.enableShutdownHooks();
+  await app.listen(
+    app.get(ConfigService).getOrThrow<number>('PORT'),
+    '0.0.0.0',
   );
-
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Kirana API')
-    .setDescription('Kirana SaaS backend API')
-    .setVersion('1.0')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-
-  SwaggerModule.setup('api/docs', app, document);
-
-  await app.listen(Number(process.env.PORT ?? 3001), '0.0.0.0');
 }
 
-void bootstrap();
+void bootstrap().catch(() => {
+  // Do not print startup exceptions: driver errors may include credentials.
+  console.error(
+    'Backend startup failed; check configuration and database availability.',
+  );
+  process.exitCode = 1;
+});

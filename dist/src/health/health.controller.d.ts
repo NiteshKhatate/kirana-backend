@@ -6,4 +6,7 @@ export declare class HealthController {
         status: string;
         database: string;
     }>;
+    live(): {
+        status: string;
+    };
 }
