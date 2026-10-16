@@ -24,3 +24,7 @@ postgres-data/
 # Local development email contains one-time verification links
 .local-mail/
 .keys/
+.local-tools/
+ops/build-info.json
+migration-manifest.json
+.backups/

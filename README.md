@@ -10,7 +10,8 @@ Use npm and the checked-in lockfile. The current machine uses Node 20.16.0; the 
 npm ci
 # For a fresh checkout only; preserve an existing local .env.
 cp -n .env.example .env
-# Replace placeholders with your local credentials.
+# Replace placeholders with your local credentials. Before the first Compose start,
+# set POSTGRES_PASSWORD in ignored .env to the SAME existing database password.
 docker compose up -d postgres
 npx prisma validate
 npx prisma generate
@@ -166,3 +167,12 @@ Store codes are organization-scoped and normalized to uppercase. Identical creat
 OWNER/ADMIN see all organization stores. Staff need ACTIVE organization membership plus an explicit ACTIVE store assignment, and see only active assigned stores. `PUT /organizations/:orgId/stores/:storeId/members/:userId` assigns MANAGER/CASHIER/INVENTORY or suspends an assignment. Current scope and roles are checked from the database, never JWT role claims.
 
 OWNER may invite ADMIN/MEMBER; ADMIN may invite MEMBER only. Codes are hashed, one-time and expire after seven days by default (`INVITATION_TTL_SECONDS`, 300?604800). Email contains the code as text for authenticated entry; no credential URL or token response is exposed. Acceptance requires matching verified email and rechecks inviter authority. Invitations do not overwrite active memberships, bypass suspension or grant store access automatically. Reissue after a 60-second cooldown revokes prior pending codes. Delivery failure preserves the invitation and is returned explicitly. Production SMTP and frontend/BFF integration remain separate work.
+
+
+## Docker, Jenkins and Render
+
+The [deployment runbook](docs/deployment.md) covers the runtime/migration images, private local Compose setup, Jenkins requirements and credential IDs, Render configuration, reviewed production migrations, smoke checks and rollback. [Milestone 7 evidence](docs/milestone-7-verification.md) separates completed local checks from pending real Jenkins/Render exit gates.
+
+After existing local database access and Prisma generation are verified, run `npm run docker:setup`, `npm run auth:keys`, then `docker compose --profile app up --build -d --wait`. The helper preserves private configuration, reuses the existing password and volume, and never resets a database. The API image runs as a non-root user and does not migrate on startup. Use `SMOKE_BASE_URL=http://127.0.0.1:3001 npm run smoke` to check it. Stop only the API with `docker compose --profile app stop backend` if resuming a host watch server.
+
+The Jenkins release is opt-in and protected-main only, after all checks, backup/SQL review and explicit operator approval. Runtime secrets stay in Render; migration/hook/API secrets stay in scoped Jenkins credentials. No secret build arguments or dotenv files enter Docker images. The Render manifest is a paid Starter-plan template (not applied); free Render services block the SMTP ports this backend needs. Existing Node 20 is preserved until the required supported-major upgrade is approved. No paid resource, production credential deployment, production migration or Render deployment was performed locally.

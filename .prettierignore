@@ -7,3 +7,7 @@ package-lock.json
 .env.*
 .local-mail/
 .keys/
+.local-tools/
+.backups/
+ops/build-info.json
+migration-manifest.json

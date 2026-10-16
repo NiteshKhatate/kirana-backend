@@ -1,0 +1,21 @@
+# Allowlist: local secrets, Git metadata, backups, mail and volumes never enter context.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.build.json
+!nest-cli.json
+!prisma.config.ts
+!prisma/
+!prisma/**
+!src/
+!src/**
+!ops/
+!ops/**
+**/*.spec.ts
+ops/*.test.cjs
+**/*.pem
+**/*.key
+**/.env*

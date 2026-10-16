@@ -114,16 +114,21 @@ Completed 2026-10-16. Both milestones use the existing schema without a migratio
 
 Completed 2026-10-16. Milestones 5 and 6 use the existing schema without a migration. API/role policy: [staff access contract](staff-access-contract.md). Files, tests, limitations and manual checks: [Milestones 5 and 6 verification](milestones-5-6-verification.md). Next: Milestone 7.
 
-## Milestone 7 — Docker, Jenkins and Render readiness
-- [ ] Multi-stage `Dockerfile` for npm install/build/runtime; correct Prisma generation, `PORT` binding, non-root execution when feasible, and `.dockerignore`.
-- [ ] `docker-compose.yml` supports local Postgres, backend startup and volume persistence (without discarding user data).
-- [ ] Jenkinsfile: checkout, `npm ci`, Prisma generate, lint/typecheck, unit tests, test DB integration/e2e, production build, Docker build, *approved* deployment to Render.
-- [ ] Use Jenkins credentials store for deployment trigger/secrets; Render env vars for runtime secrets; never bake `.env` into image.
-- [ ] Production migrate with `npx prisma migrate deploy` in a controlled, single-run job; backup and inspect migrations beforehand.
-- [ ] Implement readiness/smoke checks; deploy only if checks pass; document rollback steps.
-- [ ] Update `.env.example` and README with local commands, API endpoints and production configuration checklist.
+## Milestone 7 ? Docker, Jenkins and Render readiness
+- [x] Multi-stage non-root runtime and separate migration Docker targets, Linux Prisma/native dependencies, PORT binding, health check and secret-excluding .dockerignore; both image builds verified locally.
+- [x] Local Compose PostgreSQL/API startup and persistent volume preservation verified; private existing credentials, opt-in app profile, read-only keys and private mail storage.
+- [x] Jenkinsfile implements checkout, npm ci, Prisma, lint/typecheck, unit/operations/e2e/integration tests, builds, runtime image smoke and an approved protected-main Render release. Groovy syntax parsed; actual Jenkins run remains an exit gate below.
+- [ ] Configure the real Jenkins credentials scope and Render runtime env vars using the prepared templates; no production credentials were supplied/deployed.
+- [ ] Obtain/verify a real backup and reviewed SQL/digest, then execute the prepared SHA-bound, identity-checked production migrate-deploy job once; no production migration has been run.
+- [x] Readiness/local container smoke and guarded exact-commit deployment watcher implemented; backup/release/rollback procedures documented.
+- [x] .env.example and README updated with local commands, endpoint references and production configuration/approval requirements.
+- [ ] Execute the full Jenkins Pipeline from a reviewed commit on the configured Linux agent and retain CI evidence.
+- [ ] Resolve the preserved EOL Node 20 runtime with the required major-upgrade approval and validation before production use.
+- [ ] Execute the approved Render deployment and production smoke, retaining deploy-ID/commit/live evidence. Any new/updated paid service requires approval; free Render instances block current SMTP ports.
 
-**Exit gate:** CI passes from clean checkout; Docker image builds; production deployment/migrations/smoke tests are verified **only after actual execution** (do not mark them complete prematurely).
+Local implementation and validation completed 2026-10-16. **Overall milestone 7 remains pending the live exit gates above**, not marked deployed. Files, actual command results and outstanding requirements: [Milestone 7 verification](milestone-7-verification.md). Setup, credentials, backup/migration approval and rollback: [deployment runbook](deployment.md). No schema/migration or dependency changes.
+
+**Exit gate:** CI passes from a reviewed clean checkout on real Jenkins; both Docker targets build and runtime smoke passes; production backup/migrations/deployment/smoke are verified only after actual approved execution.
 
 ## Acceptance matrix / release blockers
 | Scenario | Must pass |
