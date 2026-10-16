@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { verify } from 'jsonwebtoken';
+import { decode, verify } from 'jsonwebtoken';
 import { isUUID } from 'class-validator';
 import { JwtConfig } from '../../config/jwt-environment';
 import { AuthClock } from './auth-clock.service';
@@ -17,7 +17,13 @@ export class AccessTokenVerifier {
     const now = Math.floor(this.clock.now().getTime() / 1000);
     try {
       if (!config.publicKey || token.length > 8192) throw new Error();
-      const result = verify(token, config.publicKey, {
+      const header = decode(token, { complete: true })?.header;
+      const key =
+        header?.kid === undefined
+          ? config.publicKey
+          : config.verificationKeys?.get(header.kid);
+      if (!key) throw new Error();
+      const result = verify(token, key, {
         algorithms: ['RS256'],
         issuer: config.issuer,
         audience: config.audience,

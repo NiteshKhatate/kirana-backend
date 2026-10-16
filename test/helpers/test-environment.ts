@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'dotenv';
 import { assertTestDatabaseUrl } from '../../src/config/database-safety';
-import { testJwtPublicKey } from './access-token';
+import { testJwtPublicKey, testJwtPrivateKey } from './access-token';
 
 export function loadTestEnvironment(requireDatabase = false): string {
   if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test') {
@@ -25,6 +25,7 @@ export function loadTestEnvironment(requireDatabase = false): string {
   process.env.PORT = '3001';
   process.env.DATABASE_URL = databaseUrl;
   process.env.JWT_PUBLIC_KEY = testJwtPublicKey;
+  process.env.JWT_PRIVATE_KEY = testJwtPrivateKey;
   process.env.JWT_ISSUER = 'kirana-identity';
   process.env.JWT_AUDIENCE = 'kirana-api';
   process.env.JWT_ACCESS_TTL_SECONDS = '900';

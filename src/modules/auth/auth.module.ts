@@ -10,12 +10,16 @@ import { AuthRateLimitGuard } from './auth-rate-limit.guard';
 import { UsersModule } from '../users/users.module';
 import { AccessTokenVerifier } from './access-token-verifier.service';
 import { AccessTokenGuard } from './access-token.guard';
+import { AccessTokenIssuer } from './access-token-issuer.service';
+import { SessionService } from './session.service';
 
 @Module({
   imports: [AuditModule, EmailModule, UsersModule],
   controllers: [AuthController],
   providers: [
     AuthService,
+    AccessTokenIssuer,
+    SessionService,
     PasswordService,
     VerificationTokenService,
     AuthClock,
@@ -23,6 +27,13 @@ import { AccessTokenGuard } from './access-token.guard';
     AccessTokenVerifier,
     AccessTokenGuard,
   ],
-  exports: [AccessTokenVerifier, AccessTokenGuard],
+  exports: [
+    AccessTokenVerifier,
+    AccessTokenGuard,
+    UsersModule,
+    AuthClock,
+    VerificationTokenService,
+    AuthRateLimitGuard,
+  ],
 })
 export class AuthModule {}

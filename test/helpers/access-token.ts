@@ -3,6 +3,9 @@ import { JwtPayload, sign, SignOptions } from 'jsonwebtoken';
 
 // Ephemeral test keys; never persisted or copied from development/production.
 const pair = generateKeyPairSync('rsa', { modulusLength: 2048 });
+export const testJwtPrivateKey = pair.privateKey
+  .export({ type: 'pkcs8', format: 'pem' })
+  .toString();
 export const testJwtPublicKey = pair.publicKey
   .export({ type: 'spki', format: 'pem' })
   .toString();

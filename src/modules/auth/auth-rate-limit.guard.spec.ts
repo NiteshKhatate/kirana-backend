@@ -35,4 +35,19 @@ describe('Auth request limits', () => {
     for (let i = 0; i < 5; i++) expect(guard.canActivate(context)).toBe(true);
     expect(() => guard.canActivate(context)).toThrow('Too Many Requests');
   });
+
+  it('normalizes account buckets across transport IPs for login abuse', () => {
+    const context = (ip: string, email: string) =>
+      ({
+        getHandler: () => function login() {},
+        switchToHttp: () => ({
+          getRequest: () => ({ ip, body: { email }, socket: {} }),
+        }),
+      }) as unknown as ExecutionContext;
+    for (let i = 0; i < 10; i++)
+      guard.canActivate(context(`peer-${i}`, ' OWNER@Example.com '));
+    expect(() =>
+      guard.canActivate(context('fresh-peer', 'owner@example.com')),
+    ).toThrow('Too Many Requests');
+  });
 });

@@ -32,6 +32,8 @@ describe('Environment validation', () => {
           SMTP_USER: 'placeholder',
           SMTP_PASSWORD: 'placeholder',
           JWT_PUBLIC_KEY: process.env.JWT_PUBLIC_KEY,
+          JWT_PRIVATE_KEY: process.env.JWT_PRIVATE_KEY,
+          RESET_PASSWORD_URL: 'https://app.example.com/reset-password',
           JWT_ISSUER: 'kirana-identity',
           JWT_AUDIENCE: 'kirana-api',
         },

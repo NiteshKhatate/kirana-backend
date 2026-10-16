@@ -23,13 +23,45 @@ export class AuthRateLimitGuard implements CanActivate {
     const limit =
       operation === 'register'
         ? 5
-        : operation === 'resendVerification'
+        : [
+              'resendVerification',
+              'login',
+              'forgotPassword',
+              'resetPassword',
+              'issueInvitation',
+            ].includes(operation)
           ? 10
           : 30;
     this.consume(
       `${operation}:${request.ip ?? request.socket.remoteAddress ?? 'unknown'}`,
       limit,
     );
+    if (
+      ['issueInvitation', 'acceptInvitation', 'revokeInvitation'].includes(
+        operation,
+      )
+    ) {
+      const authenticated = request as Request & { user?: { id: string } };
+      if (authenticated.user)
+        this.consume(
+          `${operation}:user:${authenticated.user.id}`,
+          operation === 'issueInvitation' ? 10 : 30,
+        );
+    }
+    if (['login', 'forgotPassword'].includes(operation)) {
+      // Hash normalized account identifiers in memory; do not log request bodies.
+      const body: unknown = request.body;
+      if (
+        body &&
+        typeof body === 'object' &&
+        'email' in body &&
+        typeof body.email === 'string'
+      )
+        this.consume(
+          `${operation}:account:${body.email.trim().toLowerCase()}`,
+          10,
+        );
+    }
     return true;
   }
 
