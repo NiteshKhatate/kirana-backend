@@ -99,6 +99,10 @@ describe('Organization ownership and isolation HTTP (dedicated PostgreSQL)', () 
     await client.onboardingProgress.deleteMany({
       where: { organizationId: { in: ids } },
     });
+    await client.storeMember.deleteMany({
+      where: { organizationId: { in: ids } },
+    });
+    await client.store.deleteMany({ where: { organizationId: { in: ids } } });
     await client.organizationMember.deleteMany({
       where: { organizationId: { in: ids } },
     });
@@ -110,7 +114,7 @@ describe('Organization ownership and isolation HTTP (dedicated PostgreSQL)', () 
   afterAll(async () => {
     await client?.$disconnect();
   });
-  it('completes register → verify → login → create organization over HTTP', async () => {
+  it('completes register → verify → login → organization → first store → onboarding over HTTP', async () => {
     const address = `${randomUUID()}@onboarding.example.invalid`;
     const password = 'a secure onboarding password';
     const registered = await request(app.getHttpServer())
@@ -133,6 +137,19 @@ describe('Organization ownership and isolation HTTP (dedicated PostgreSQL)', () 
     const organization = (await create(accessToken).expect(201))
       .body as OrganizationBody;
     expect(organization.role).toBe('OWNER');
+    await request(app.getHttpServer())
+      .post(`/api/v1/organizations/${organization.id}/stores`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ code: 'MAIN', name: 'Main Store' })
+      .expect(201);
+    const completed = await request(app.getHttpServer())
+      .post(`/api/v1/organizations/${organization.id}/onboarding/complete`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+    expect(completed.body).toMatchObject({
+      currentStep: 'COMPLETE',
+      organizationStatus: 'ACTIVE',
+    });
     await details(organization.id, accessToken).expect(200);
     await details(organization.id, ownerToken).expect(403);
   });

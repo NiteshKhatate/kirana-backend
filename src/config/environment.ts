@@ -1,4 +1,8 @@
 import { assertTestDatabaseUrl } from './database-safety';
+import {
+  InvitationConfig,
+  validateInvitationEnvironment,
+} from './invitation-environment';
 import { MailConfig, validateMailEnvironment } from './mail-environment';
 import { JwtConfig, validateJwtEnvironment } from './jwt-environment';
 import {
@@ -15,6 +19,7 @@ export interface Environment {
   MAIL: MailConfig;
   JWT: JwtConfig;
   SESSION: SessionConfig;
+  INVITATIONS: InvitationConfig;
 }
 
 export function runtimeEnvironment(
@@ -99,6 +104,7 @@ export function validateEnvironment(
     MAIL: validateMailEnvironment(input, mode),
     JWT: jwt,
     SESSION: validateSessionEnvironment(input, mode, jwt),
+    INVITATIONS: validateInvitationEnvironment(input),
   };
 }
 

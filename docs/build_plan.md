@@ -92,25 +92,27 @@ All Milestone 2 tasks completed 2026-10-13, including `/auth/me`. Its JWT verifi
 Completed 2026-10-16. Both milestones use the existing schema without a migration. Contracts, files, validation and limitations: [Milestones 3 and 4 verification](milestones-3-4-verification.md). Browser responsibilities: [BFF/cookie and CSRF contract](browser-auth-contract.md). Next: Milestone 5.
 
 ## Milestone 5 — Stores and onboarding completion
-- [ ] Implement `POST /organizations/:orgId/stores` (OWNER/ADMIN) with org-bound store code uniqueness and validated location/contact fields.
-- [ ] Implement `GET /organizations/:orgId/stores` with authorized organization-scoped filtering.
-- [ ] Implement `GET /organizations/:orgId/onboarding` to resume incomplete registration.
-- [ ] Implement `POST /organizations/:orgId/onboarding/complete`: ensure owner + at least one store; transition ONBOARDING → ACTIVE atomically; repeated completion is idempotent.
-- [ ] Clarify ownership: OWNER/ADMIN can access all stores; store staff require active org membership + explicit store membership.
-- [ ] Tests for no-store completion failure, cross-org store injection, duplicate code, store creation role restrictions, retry/resume and transaction rollback.
+- [x] Implement `POST /organizations/:orgId/stores` (OWNER/ADMIN) with org-bound store code uniqueness and validated location/contact fields.
+- [x] Implement `GET /organizations/:orgId/stores` with authorized organization-scoped filtering.
+- [x] Implement `GET /organizations/:orgId/onboarding` to resume incomplete registration.
+- [x] Implement `POST /organizations/:orgId/onboarding/complete`: ensure owner + at least one store; transition ONBOARDING → ACTIVE atomically; repeated completion is idempotent.
+- [x] Clarify ownership: OWNER/ADMIN can access all stores; store staff require active org membership + explicit store membership.
+- [x] Tests for no-store completion failure, cross-org store injection, duplicate code, store creation role restrictions, retry/resume and transaction rollback.
 
 **Exit gate:** end-to-end register → verify → login → create tenant → create first store → complete onboarding works and is secure.
 
 ## Milestone 6 — Staff invitations and membership access
-- [ ] Implement `POST /organizations/:orgId/invitations` with expiring hashed token and OWNER/ADMIN guard.
-- [ ] Implement invitation acceptance for verified matching-email users, creating/activating organization membership atomically.
-- [ ] Implement `GET /organizations/:orgId/members` scoped to owner/admin; never expose sensitive user fields.
-- [ ] Add explicit store-assignment service using existing `StoreMember` for MANAGER/CASHIER/INVENTORY, with active org membership checks. Define/API-doc any needed endpoint before exposing it.
-- [ ] Reject cross-organization store assignments, suspended members, expired/revoked invitation, unauthorized inviter and duplicate acceptance.
-- [ ] Audit invitation issue/revoke/accept and staff access changes.
-- [ ] Unit/integration/e2e tests for valid and invalid invites and store membership scope.
+- [x] Implement `POST /organizations/:orgId/invitations` with expiring hashed token and OWNER/ADMIN guard.
+- [x] Implement invitation acceptance for verified matching-email users, creating/activating organization membership atomically.
+- [x] Implement `GET /organizations/:orgId/members` scoped to owner/admin; never expose sensitive user fields.
+- [x] Add explicit store-assignment service using existing `StoreMember` for MANAGER/CASHIER/INVENTORY, with active org membership checks. Define/API-doc any needed endpoint before exposing it.
+- [x] Reject cross-organization store assignments, suspended members, expired/revoked invitation, unauthorized inviter and duplicate acceptance.
+- [x] Audit invitation issue/revoke/accept and staff access changes.
+- [x] Unit/integration/e2e tests for valid and invalid invites and store membership scope.
 
 **Exit gate:** invited staff can join with correct org scope; access can be checked by store and role.
+
+Completed 2026-10-16. Milestones 5 and 6 use the existing schema without a migration. API/role policy: [staff access contract](staff-access-contract.md). Files, tests, limitations and manual checks: [Milestones 5 and 6 verification](milestones-5-6-verification.md). Next: Milestone 7.
 
 ## Milestone 7 — Docker, Jenkins and Render readiness
 - [ ] Multi-stage `Dockerfile` for npm install/build/runtime; correct Prisma generation, `PORT` binding, non-root execution when feasible, and `.dockerignore`.

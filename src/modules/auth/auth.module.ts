@@ -27,6 +27,13 @@ import { SessionService } from './session.service';
     AccessTokenVerifier,
     AccessTokenGuard,
   ],
-  exports: [AccessTokenVerifier, AccessTokenGuard, UsersModule],
+  exports: [
+    AccessTokenVerifier,
+    AccessTokenGuard,
+    UsersModule,
+    AuthClock,
+    VerificationTokenService,
+    AuthRateLimitGuard,
+  ],
 })
 export class AuthModule {}

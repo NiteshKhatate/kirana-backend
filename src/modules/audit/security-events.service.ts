@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 export type SecurityEvent =
   | 'account.registered'
+  | 'invitation.delivery_failed'
   | 'session.login'
   | 'session.logout'
   | 'session.refresh_rejected'

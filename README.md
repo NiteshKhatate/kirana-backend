@@ -143,7 +143,7 @@ docker compose --env-file .env.test -f docker-compose.test.yml stop
 
 ## Delivery status
 
-Milestone 1 evidence is in [Milestone 1 verification](docs/milestone-1-verification.md); all Milestone 2 tasks, including `/auth/me`, are recorded in [Milestone 2 verification](docs/milestone-2-verification.md). Milestones 3 and 4 are complete: [verification and API examples](docs/milestones-3-4-verification.md). Next is Milestone 5, stores and onboarding completion. Docker packaging, Jenkins and Render remain later work; nothing has been deployed. Stop the local development server before `npm ci` on Windows so its Prisma DLL can be replaced, then restart after generation/build.
+Milestone 1 evidence is in [Milestone 1 verification](docs/milestone-1-verification.md); all Milestone 2 tasks, including `/auth/me`, are recorded in [Milestone 2 verification](docs/milestone-2-verification.md). Milestones 3 and 4 are complete: [verification and API examples](docs/milestones-3-4-verification.md). Milestones 5 and 6 are also complete: [verification](docs/milestones-5-6-verification.md). Next is Milestone 7, Docker packaging, Jenkins and Render readiness. Docker packaging, Jenkins and Render remain later work; nothing has been deployed. Stop the local development server before `npm ci` on Windows so its Prisma DLL can be replaced, then restart after generation/build.
 
 
 ## Login, recovery and organizations
@@ -155,3 +155,14 @@ Refresh families expire absolutely after seven days by default. Reuse/concurrenc
 Organization creation requires a stable slug. Repeat the same normalized slug/payload to resume the original organization as its active creator-owner. Changed payload, another creator, or unavailable organization returns 409. Organization reads require current ACTIVE memberships; suspended organizations are inaccessible. The internal membership service prevents demotion/suspension of the final active owner; no public mutation endpoint is exposed.
 
 Development signing keys use `npm run auth:keys`. Production requires matching RSA public/private PEMs. `JWT_KEY_ID` defaults to a SHA-256-derived public-key ID. `JWT_PREVIOUS_PUBLIC_KEYS` maps up to five previous IDs to PUBLIC PEMs for overlap. Switch the active matching pair/ID together, retain old public keys until all old access tokens expire, then remove them. Restart to load each validated configuration snapshot. Never commit private keys. No JWKS endpoint or independent service deployment is implied.
+
+
+## Stores, onboarding and staff
+
+[Staff access contract](docs/staff-access-contract.md) lists store create/list/detail, onboarding resume/complete, invitation issue/revoke/accept, safe member listing and explicit store assignment APIs. [Milestones 5 and 6 verification](docs/milestones-5-6-verification.md) records files, safe examples, tests and manual checks.
+
+Store codes are organization-scoped and normalized to uppercase. Identical creation retries resume the same store; changed payload returns 409. Creating the first store advances onboarding to REVIEW; OWNER/ADMIN may complete with an active verified owner and active store. Completion is atomic and idempotent.
+
+OWNER/ADMIN see all organization stores. Staff need ACTIVE organization membership plus an explicit ACTIVE store assignment, and see only active assigned stores. `PUT /organizations/:orgId/stores/:storeId/members/:userId` assigns MANAGER/CASHIER/INVENTORY or suspends an assignment. Current scope and roles are checked from the database, never JWT role claims.
+
+OWNER may invite ADMIN/MEMBER; ADMIN may invite MEMBER only. Codes are hashed, one-time and expire after seven days by default (`INVITATION_TTL_SECONDS`, 300?604800). Email contains the code as text for authenticated entry; no credential URL or token response is exposed. Acceptance requires matching verified email and rechecks inviter authority. Invitations do not overwrite active memberships, bypass suspension or grant store access automatically. Reissue after a 60-second cooldown revokes prior pending codes. Delivery failure preserves the invitation and is returned explicitly. Production SMTP and frontend/BFF integration remain separate work.

@@ -11,6 +11,19 @@ export class EmailService {
     private readonly adapter: MailAdapter,
   ) {}
 
+  sendInvitation(
+    email: string,
+    token: string,
+    expiresAt: Date,
+  ): Promise<MailDelivery> {
+    // One-time invitation codes stay in the mail body, never URL credentials.
+    return this.adapter.send({
+      to: email,
+      subject: 'Your Kirana staff invitation',
+      text: `You have been invited to join an organization in Kirana. Sign in with this email, verify it, and enter this one-time invitation code:\n${token}\n\nExpires at ${expiresAt.toISOString()}. If you did not expect this invitation, ignore this email.`,
+    });
+  }
+
   sendPasswordReset(email: string, token: string): Promise<MailDelivery> {
     const session = this.config.getOrThrow<SessionConfig>('SESSION');
     const url = new URL(session.resetUrl);
