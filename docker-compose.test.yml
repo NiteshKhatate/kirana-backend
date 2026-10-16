@@ -18,3 +18,4 @@ services:
       retries: 30
 volumes:
   kirana_test_data:
+    name: ${POSTGRES_TEST_VOLUME_NAME:-kirana-backend-test_kirana_test_data}

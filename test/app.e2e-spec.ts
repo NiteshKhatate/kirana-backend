@@ -187,14 +187,14 @@ describe('Foundation HTTP (database mocked)', () => {
     expect(response.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
   });
 
-  it('does not expose unfinished domain APIs', async () => {
+  it('validates login without logging credentials', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/auth/login')
       .send({ password: 'private-body-password' })
-      .expect(404);
+      .expect(400);
     expect(response.body).toMatchObject({
-      statusCode: 404,
-      message: 'Not Found',
+      statusCode: 400,
+      message: 'Bad Request',
     });
     expect(JSON.stringify(log.mock.calls)).not.toContain(
       'private-body-password',

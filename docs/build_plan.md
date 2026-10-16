@@ -68,26 +68,28 @@ All Milestone 2 tasks completed 2026-10-13, including `/auth/me`. Its JWT verifi
 **Exit gate:** a new user can register, verify email, and has no plaintext credential/token persisted.
 
 ## Milestone 3 — Login, JWT, refresh and recovery
-- [ ] Complete signing-key configuration and token issuance/key rotation (prefer RS256); public-key config, issuer/audience/expiry validation and access JWT guard were completed with Milestone 2's `/auth/me` prerequisite.
-- [ ] Implement `POST /api/v1/auth/login` requiring verified, active account; use safe errors and rate limiting.
-- [ ] Implement `POST /api/v1/auth/refresh`: opaque random refresh token, hash in `RefreshSession`, atomic rotation, family-based replay handling, concurrent requests safe.
-- [ ] Implement `POST /api/v1/auth/logout`: revoke refresh session; document behavior of still-valid short-lived access tokens.
-- [ ] Implement `POST /api/v1/auth/forgot-password` and `/reset-password` using one-time hashed tokens and generic responses; revoke sessions after reset.
-- [ ] Define Next.js BFF/cookie and CSRF contract without requiring frontend changes in this backend milestone.
-- [ ] Jest tests for incorrect password, user status, unverified login, JWT claims, refresh expiration/replay/race, logout, reset and abuse/rate-limit behavior.
+- [x] Complete signing-key configuration and token issuance/key rotation (prefer RS256); public-key config, issuer/audience/expiry validation and access JWT guard were completed with Milestone 2's `/auth/me` prerequisite.
+- [x] Implement `POST /api/v1/auth/login` requiring verified, active account; use safe errors and rate limiting.
+- [x] Implement `POST /api/v1/auth/refresh`: opaque random refresh token, hash in `RefreshSession`, atomic rotation, family-based replay handling, concurrent requests safe.
+- [x] Implement `POST /api/v1/auth/logout`: revoke refresh session; document behavior of still-valid short-lived access tokens.
+- [x] Implement `POST /api/v1/auth/forgot-password` and `/reset-password` using one-time hashed tokens and generic responses; revoke sessions after reset.
+- [x] Define Next.js BFF/cookie and CSRF contract without requiring frontend changes in this backend milestone.
+- [x] Jest tests for incorrect password, user status, unverified login, JWT claims, refresh expiration/replay/race, logout, reset and abuse/rate-limit behavior.
 
 **Exit gate:** registered and verified user can log in, access `/auth/me`, refresh credentials once, log out and reset password; replay is contained.
 
 ## Milestone 4 — Tenant creation and authorization
-- [ ] Implement organization DTO and `POST /api/v1/organizations` using one Prisma transaction to create: `Organization` (`ONBOARDING`), `OrganizationMember` (`OWNER`, `ACTIVE`), `OnboardingProgress`.
-- [ ] Handle unique slug collisions and retries/idempotency safely; never generate duplicate organizations from a repeated request.
-- [ ] Implement `GET /organizations` listing only ACTIVE user memberships and `GET /organizations/:orgId` with membership checks.
-- [ ] Build organization role decorator/guard: OWNER, ADMIN, MEMBER; reject inactive/suspended members and stale claims.
-- [ ] Prevent last active OWNER demotion/removal as future membership endpoints are added.
-- [ ] Record org creation/administrative changes in `AuditLog` in transaction where practical.
-- [ ] Jest unit + DB integration tests for rollback, ownership, repeated submission, duplicate slug and tenant A/B isolation.
+- [x] Implement organization DTO and `POST /api/v1/organizations` using one Prisma transaction to create: `Organization` (`ONBOARDING`), `OrganizationMember` (`OWNER`, `ACTIVE`), `OnboardingProgress`.
+- [x] Handle unique slug collisions and retries/idempotency safely; never generate duplicate organizations from a repeated request.
+- [x] Implement `GET /organizations` listing only ACTIVE user memberships and `GET /organizations/:orgId` with membership checks.
+- [x] Build organization role decorator/guard: OWNER, ADMIN, MEMBER; reject inactive/suspended members and stale claims.
+- [x] Prevent last active OWNER demotion/removal as future membership endpoints are added.
+- [x] Record org creation/administrative changes in `AuditLog` in transaction where practical.
+- [x] Jest unit + DB integration tests for rollback, ownership, repeated submission, duplicate slug and tenant A/B isolation.
 
 **Exit gate:** verified user creates organization and becomes its OWNER; an unrelated account cannot read it.
+
+Completed 2026-10-16. Both milestones use the existing schema without a migration. Contracts, files, validation and limitations: [Milestones 3 and 4 verification](milestones-3-4-verification.md). Browser responsibilities: [BFF/cookie and CSRF contract](browser-auth-contract.md). Next: Milestone 5.
 
 ## Milestone 5 — Stores and onboarding completion
 - [ ] Implement `POST /organizations/:orgId/stores` (OWNER/ADMIN) with org-bound store code uniqueness and validated location/contact fields.

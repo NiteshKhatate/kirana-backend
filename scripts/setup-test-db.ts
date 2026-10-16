@@ -18,7 +18,7 @@ async function main(): Promise<void> {
     const url = `postgresql://kirana_test:${password}@127.0.0.1:5434/kirana_identity_test?schema=public`;
     writeFileSync(
       envPath,
-      `NODE_ENV=test\nPORT=3001\nPOSTGRES_TEST_PASSWORD=${password}\nDATABASE_URL_TEST=${url}\n`,
+      `NODE_ENV=test\nPORT=3001\nPOSTGRES_TEST_PASSWORD=${password}\nDATABASE_URL_TEST=${url}\nPOSTGRES_TEST_VOLUME_NAME=kirana-backend-test-${randomBytes(8).toString('hex')}-data\n`,
       { flag: 'wx', mode: 0o600 },
     );
     console.log(

@@ -1,6 +1,10 @@
 import { assertTestDatabaseUrl } from './database-safety';
 import { MailConfig, validateMailEnvironment } from './mail-environment';
 import { JwtConfig, validateJwtEnvironment } from './jwt-environment';
+import {
+  SessionConfig,
+  validateSessionEnvironment,
+} from './session-environment';
 
 export type RuntimeEnvironment = 'development' | 'test' | 'production';
 
@@ -10,6 +14,7 @@ export interface Environment {
   DATABASE_URL: string;
   MAIL: MailConfig;
   JWT: JwtConfig;
+  SESSION: SessionConfig;
 }
 
 export function runtimeEnvironment(
@@ -86,12 +91,14 @@ export function validateEnvironment(
   }
   if (invalid.size)
     throw new Error(`Invalid configuration: ${[...invalid].join(', ')}`);
+  const jwt = validateJwtEnvironment(input, mode);
   return {
     NODE_ENV: mode,
     PORT: port,
     DATABASE_URL: databaseUrl as string,
     MAIL: validateMailEnvironment(input, mode),
-    JWT: validateJwtEnvironment(input, mode),
+    JWT: jwt,
+    SESSION: validateSessionEnvironment(input, mode, jwt),
   };
 }
 
