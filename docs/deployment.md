@@ -55,6 +55,8 @@ For local uncommitted testing the Dockerfile accepts `BUILD_SHA=unknown`. A migr
 
 ## Jenkins setup and pipeline
 
+For free local learning with the existing Docker Desktop controller, use [local Jenkins setup](jenkins-local.md). It prepares a separate Linux agent and isolated CI Docker daemon and keeps production deployment disabled.
+
 Use a protected multibranch Pipeline and the repository's `Jenkinsfile`, with a dedicated trusted Linux agent labeled `kirana-backend-ci`. Required: approved Node 20/npm versions, Docker Engine/Compose, Git, and Jenkins Pipeline, Git, Credentials Binding and Lockable Resources plugins. After the approved runtime-major change, update the agent check and base image together. Do not expose production credentials to untrusted PR Jenkinsfiles, shared agents, shell tracing, or arbitrary build parameters. Only protected main builds may enter deployment; non-main/PR builds never bind deployment secrets.
 
 Stages: checkout → `npm ci` → Prisma validate/generate → non-mutating lint/typecheck → unit/operations/HTTP tests → verified dedicated PostgreSQL integration → production build → both Docker targets → runtime-image smoke. Lockable Resources serialize loopback test port 5434 across jobs, and a separate release lock serializes migration/deploy jobs. Existing test configuration/volumes are preserved. No CI step truncates databases or removes volumes.

@@ -128,6 +128,8 @@ Completed 2026-10-16. Milestones 5 and 6 use the existing schema without a migra
 
 Local implementation and validation completed 2026-10-16. **Overall milestone 7 remains pending the live exit gates above**, not marked deployed. Files, actual command results and outstanding requirements: [Milestone 7 verification](milestone-7-verification.md). Setup, credentials, backup/migration approval and rollback: [deployment runbook](deployment.md). No schema/migration or dependency changes.
 
+Free local learning path: [local Jenkins agent setup](jenkins-local.md) provides a separate Linux inbound agent and isolated Docker daemon for CI with `DEPLOY_RENDER=false`. Connecting the node and recording an actual Jenkins job result are still required. This does not provision hosting or complete the production release gates; adapting hosted email/Render checks to free hosting is separate work.
+
 **Exit gate:** CI passes from a reviewed clean checkout on real Jenkins; both Docker targets build and runtime smoke passes; production backup/migrations/deployment/smoke are verified only after actual approved execution.
 
 ## Acceptance matrix / release blockers

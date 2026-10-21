@@ -1,0 +1,60 @@
+name: kirana-jenkins-local
+services:
+  docker:
+    image: docker:dind
+    container_name: kirana-jenkins-docker
+    privileged: true
+    restart: unless-stopped
+    environment:
+      DOCKER_TLS_CERTDIR: ''
+    # A private Unix socket only; no unauthenticated TCP Docker listener.
+    command:
+      [
+        'dockerd',
+        '--host=unix:///run/kirana-docker/docker.sock',
+        '--group=root',
+      ]
+    volumes:
+      - docker_socket:/run/kirana-docker
+      - docker_data:/var/lib/docker
+    healthcheck:
+      test:
+        ['CMD', 'docker', '-H', 'unix:///run/kirana-docker/docker.sock', 'info']
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    networks:
+      - jenkins
+
+  agent:
+    profiles: ['agent']
+    build:
+      context: ./ops/jenkins
+    image: kirana-jenkins-agent:local
+    container_name: kirana-jenkins-agent
+    restart: unless-stopped
+    depends_on:
+      docker:
+        condition: service_healthy
+    # The test DB publishes to the daemon's loopback; tests run there too.
+    network_mode: service:docker
+    group_add: ['0']
+    environment:
+      DOCKER_HOST: unix:///run/kirana-docker/docker.sock
+      JENKINS_URL: http://kirana-jenkins:8080/
+      JENKINS_AGENT_NAME: kirana-backend-ci
+      JENKINS_SECRET: ${JENKINS_AGENT_SECRET:-}
+      JENKINS_WEB_SOCKET: 'true'
+      JENKINS_AGENT_WORKDIR: /home/jenkins/agent
+    volumes:
+      - docker_socket:/run/kirana-docker
+      - agent_work:/home/jenkins/agent
+
+networks:
+  jenkins:
+    name: kirana-jenkins-local
+
+volumes:
+  docker_socket:
+  docker_data:
+  agent_work:

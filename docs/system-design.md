@@ -169,5 +169,8 @@ Render configuration uses Docker, one instance, auto-deploy off and DB readiness
 - API: DTO rejects extra fields; sensitive fields excluded; Swagger documented; tests use isolated `DATABASE_URL_TEST` or dedicated test DB and never destroy dev data.
 - Ops: `npm run build`, unit Jest, e2e Jest, Docker build, migration status, Render smoke test (upon actual deployment).
 
+Local Jenkins learning uses the existing controller plus a separate Linux inbound agent and Docker-in-Docker daemon (`docker-compose.jenkins.yml`). The agent shares the daemon's network namespace to preserve the verified loopback test URL and host-network smoke behavior. CI images/test volumes are separate from host development data; no host Docker socket is mounted. The local privileged daemon uses only a private shared Unix socket and no published Docker TCP port. Agent authentication is stored in ignored `.env.jenkins.local`; local builds need no production credentials and keep `DEPLOY_RENDER=false`. See [local Jenkins setup](jenkins-local.md). This adds no application service/database boundary or schema change and does not complete the live production gates.
+
 ## 11. Future extraction to actual microservices
+
 When specifically authorized: extract identity and tenant modules into separate NestJS deployments, move tenant tables from `kirana_identity` to `kirana_tenant`, eliminate SQL cross-domain FKs, verify identity via signed JWT/public keys, and introduce resilient asynchronous integration for email/onboarding where needed. Plan data backfill and rollback before migration. Do **not** perform this during Phase 1 without approval.
