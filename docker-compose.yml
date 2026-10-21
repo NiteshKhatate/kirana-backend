@@ -5,10 +5,10 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: kirana
-      POSTGRES_PASSWORD: kirana_local_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run npm run docker:setup using the existing local DATABASE_URL}
       POSTGRES_DB: kirana_identity
     ports:
-      - '5433:5432'
+      - '127.0.0.1:5433:5432'
     volumes:
       - kirana_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +16,31 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    profiles: ['app']
+    build:
+      context: .
+      target: runtime
+    image: kirana-backend:local
+    init: true
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      # Runtime-only file, never copied into an image or displayed by setup tools.
+    env_file:
+      - path: .env.docker
+        required: false
+    ports:
+      - '127.0.0.1:${BACKEND_PORT:-3001}:3001'
+    volumes:
+      - ./.keys:/app/.keys:ro
+      - ./.local-mail:/app/.local-mail
+    stop_grace_period: 30s
 
 volumes:
   kirana_postgres_data:

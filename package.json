@@ -22,7 +22,13 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config ./test/jest-integration.json --runInBand",
     "db:test:setup": "ts-node scripts/setup-test-db.ts",
-    "auth:keys": "ts-node scripts/setup-auth-keys.ts"
+    "auth:keys": "ts-node scripts/setup-auth-keys.ts",
+    "lint:check": "eslint \"{src,apps,libs,test,scripts}/**/*.ts\"",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test:ops": "node --test ops/operations.test.cjs",
+    "docker:setup": "node ops/setup-docker-local.cjs",
+    "smoke": "node ops/smoke.cjs",
+    "migration:manifest": "node ops/migration-manifest.cjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.7",

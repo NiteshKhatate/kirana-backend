@@ -1,0 +1,49 @@
+# Review against the existing service before importing. Does not provision a database.
+# Starter is PAID; user approval is required before provisioning/upgrading a service.
+# Free services block the SMTP ports required by the existing email adapter.
+services:
+  - type: web
+    name: kirana-backend
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: 'off'
+    healthCheckPath: /api/v1/health
+    numInstances: 1
+    maxShutdownDelaySeconds: 30
+    # Migrations are a single approved Jenkins job using the migration image.
+    # Do not also configure a preDeployCommand or migrations in app startup.
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '10000'
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_PUBLIC_KEY
+        sync: false
+      - key: JWT_PRIVATE_KEY
+        sync: false
+      - key: JWT_ISSUER
+        sync: false
+      - key: JWT_AUDIENCE
+        sync: false
+      - key: MAIL_TRANSPORT
+        value: smtp
+      - key: EMAIL_FROM
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: '587'
+      - key: SMTP_SECURE
+        value: 'false'
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: VERIFY_EMAIL_URL
+        sync: false
+      - key: RESET_PASSWORD_URL
+        sync: false
