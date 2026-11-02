@@ -1,0 +1,99 @@
+name: Backend CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      RELEASE_SHA: ${{ github.sha }}
+      DOCKER_BUILDKIT: '1'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          # Preserve the repository's approved runtime major.
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+        env:
+          PRISMA_SKIP_POSTINSTALL_GENERATE: 'true'
+
+      - name: Validate schema and generate Prisma Client
+        run: |
+          npx --no-install prisma validate
+          npx --no-install prisma generate
+        env:
+          # Generation never connects to this deliberately unusable target.
+          DATABASE_URL: postgresql://build:unused@127.0.0.1:5432/kirana_identity
+
+      - name: Check lint, formatting and types
+        run: |
+          npm run lint:check
+          npx --no-install prettier --check '.github/workflows/*.yml' 'ops/*.cjs' render.yaml
+          npm run typecheck
+
+      - name: Run unit tests
+        run: npm test -- --runInBand
+
+      - name: Run operations checks
+        run: npm run test:ops
+
+      - name: Run HTTP e2e tests
+        run: npm run test:e2e -- --runInBand
+
+      - name: Prepare dedicated test database
+        # Generates private test credentials and verifies live identity before
+        # applying existing migrations. Each hosted runner has its own Docker daemon.
+        run: npm run db:test:setup
+
+      - name: Check test migration status
+        run: |
+          set -a
+          . ./.env.test
+          set +a
+          DATABASE_URL="$DATABASE_URL_TEST" npx --no-install prisma migrate status
+
+      - name: Run PostgreSQL integration tests
+        run: npm run test:integration
+
+      - name: Build application
+        run: npm run build
+
+      - name: Build runtime and migration images
+        run: |
+          docker build --target runtime --build-arg BUILD_SHA="$RELEASE_SHA" -t "kirana-backend:$RELEASE_SHA" .
+          docker build --target migration --build-arg BUILD_SHA="$RELEASE_SHA" -t "kirana-backend-migration:$RELEASE_SHA" .
+
+      - name: Smoke-test runtime image
+        run: node ops/container-smoke.cjs
+        env:
+          SMOKE_IMAGE: kirana-backend:${{ github.sha }}
+
+      - name: Stop test database
+        if: always()
+        run: |
+          if [ -f .env.test ]; then
+            docker compose --env-file .env.test -f docker-compose.test.yml stop
+          fi

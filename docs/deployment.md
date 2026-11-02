@@ -55,6 +55,8 @@ For local uncommitted testing the Dockerfile accepts `BUILD_SHA=unknown`. A migr
 
 ## Jenkins setup and pipeline
 
+**Current CI choice (2026-11-02):** Jenkins setup is deferred. `.github/workflows/CI.yml` runs the quality, dedicated-database tests, application/Docker builds and runtime smoke on GitHub-hosted Ubuntu runners. It needs no repository secrets and has no production release stage. Its test-database migration step uses the existing identity-checked helper; only the runner's dedicated test database is migrated. Commit and push the workflow, inspect **Actions → Backend CI**, and retain a successful hosted result before requiring **Backend checks** in branch protection. The Jenkins setup/release instructions below are retained for future use and do not imply that GitHub Actions deploys the application. No migration or runtime-major change accompanies this provider switch.
+
 For free local learning with the existing Docker Desktop controller, use [local Jenkins setup](jenkins-local.md). It prepares a separate Linux agent and isolated CI Docker daemon and keeps production deployment disabled.
 
 Use a protected multibranch Pipeline and the repository's `Jenkinsfile`, with a dedicated trusted Linux agent labeled `kirana-backend-ci`. Required: approved Node 20/npm versions, Docker Engine/Compose, Git, and Jenkins Pipeline, Git, Credentials Binding and Lockable Resources plugins. After the approved runtime-major change, update the agent check and base image together. Do not expose production credentials to untrusted PR Jenkinsfiles, shared agents, shell tracing, or arbitrary build parameters. Only protected main builds may enter deployment; non-main/PR builds never bind deployment secrets.

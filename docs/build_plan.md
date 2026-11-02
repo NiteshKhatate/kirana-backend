@@ -115,6 +115,14 @@ Completed 2026-10-16. Both milestones use the existing schema without a migratio
 Completed 2026-10-16. Milestones 5 and 6 use the existing schema without a migration. API/role policy: [staff access contract](staff-access-contract.md). Files, tests, limitations and manual checks: [Milestones 5 and 6 verification](milestones-5-6-verification.md). Next: Milestone 7.
 
 ## Milestone 7 ? Docker, Jenkins and Render readiness
+
+**CI direction (2026-11-02):** Jenkins setup is deferred at the user's request. The active CI definition is `.github/workflows/CI.yml`, using GitHub-hosted Ubuntu runners for pushes, pull requests and manual runs. It performs the existing quality/test/build/container-smoke checks using only a dedicated test database. Jenkins release automation is retained for future work; GitHub Actions does not deploy or use production credentials. No schema, migration or dependency-major changes are required.
+
+- [x] Add GitHub Actions CI with npm lockfile installation, Prisma validation/generation, lint/types, unit/operations/HTTP/integration tests, application and Docker builds, and runtime smoke.
+- [ ] Obtain a successful hosted **Backend CI / Backend checks** run from a reviewed commit. Local command results alone do not complete this gate.
+
+Local CI-definition validation (2026-11-02): `npm ci`, Prisma 6.19 validation/generation, build, lint, typecheck, workflow/operations formatting, YAML parsing, actionlint 1.7.12 and whitespace checks passed; unit tests passed 157/30 suites, HTTP e2e 51/5 suites and operations 12 checks (external calls mocked). Docker Desktop's Linux engine was unavailable during checks, so integration tests, live migration status, Docker builds and Linux runtime smoke were not verified in this run. An unverified-target migration-status attempt was rejected by automatic approval review before execution. The workflow uses the existing identity-checked dedicated test setup before its migration-status step. Host Node 20.16 emitted a locked-dependency engine warning; CI selects Node 20 via setup-node, without changing the repository's runtime major. No hosted Actions run or production operation was performed.
+
 - [x] Multi-stage non-root runtime and separate migration Docker targets, Linux Prisma/native dependencies, PORT binding, health check and secret-excluding .dockerignore; both image builds verified locally.
 - [x] Local Compose PostgreSQL/API startup and persistent volume preservation verified; private existing credentials, opt-in app profile, read-only keys and private mail storage.
 - [x] Jenkinsfile implements checkout, npm ci, Prisma, lint/typecheck, unit/operations/e2e/integration tests, builds, runtime image smoke and an approved protected-main Render release. Groovy syntax parsed; actual Jenkins run remains an exit gate below.
@@ -130,7 +138,7 @@ Local implementation and validation completed 2026-10-16. **Overall milestone 7 
 
 Free local learning path: [local Jenkins agent setup](jenkins-local.md) provides a separate Linux inbound agent and isolated Docker daemon for CI with `DEPLOY_RENDER=false`. Connecting the node and recording an actual Jenkins job result are still required. This does not provision hosting or complete the production release gates; adapting hosted email/Render checks to free hosting is separate work.
 
-**Exit gate:** CI passes from a reviewed clean checkout on real Jenkins; both Docker targets build and runtime smoke passes; production backup/migrations/deployment/smoke are verified only after actual approved execution.
+**Exit gate:** CI passes from a reviewed clean checkout on GitHub Actions; both Docker targets build and runtime smoke passes. Jenkins execution is deferred. Production backup/migrations/deployment/smoke remain separate gates and are verified only after actual approved execution.
 
 ## Acceptance matrix / release blockers
 | Scenario | Must pass |
