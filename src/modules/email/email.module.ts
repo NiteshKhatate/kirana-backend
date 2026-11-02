@@ -4,6 +4,7 @@ import { MailConfig } from '../../config/mail-environment';
 import { MailAdapter } from './mail.adapter';
 import { DevelopmentMailAdapter } from './development-mail.adapter';
 import { SmtpMailAdapter } from './smtp-mail.adapter';
+import { ResendMailAdapter } from './resend-mail.adapter';
 import { EmailService } from './email.service';
 
 class TestMailAdapter extends MailAdapter {
@@ -22,6 +23,7 @@ class TestMailAdapter extends MailAdapter {
         const mail = config.getOrThrow<MailConfig>('MAIL');
         if (mail.transport === 'test') return new TestMailAdapter();
         if (mail.transport === 'smtp') return new SmtpMailAdapter(mail);
+        if (mail.transport === 'resend') return new ResendMailAdapter(mail);
         return new DevelopmentMailAdapter(
           config.getOrThrow<string>('NODE_ENV'),
         );

@@ -1,5 +1,5 @@
 # Local learning agent: preserve the application's existing Node major.
-FROM node:20-bookworm-slim AS node
+FROM node:24-bookworm-slim AS node
 FROM docker:cli AS docker
 FROM jenkins/inbound-agent:jdk21
 USER root

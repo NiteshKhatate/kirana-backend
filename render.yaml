@@ -1,49 +1,56 @@
-# Review against the existing service before importing. Does not provision a database.
-# Starter is PAID; user approval is required before provisioning/upgrading a service.
-# Free services block the SMTP ports required by the existing email adapter.
+# Free preview only. The database expires after 30 days; do not store production data.
+# Apply only after setting secrets and reviewing the two original migrations.
+databases:
+  - name: kirana-identity-preview
+    databaseName: kirana_identity
+    user: kirana
+    plan: free
+    region: singapore
+    postgresMajorVersion: '17'
+    # Temporarily allow only the operator's IP for reviewed external migrations,
+    # then restore internal-only access. Never allow 0.0.0.0/0 for convenience.
+    ipAllowList: []
+
 services:
   - type: web
-    name: kirana-backend
+    name: kirana-backend-preview
     runtime: docker
-    plan: starter
+    plan: free
+    region: singapore
+    branch: master
     dockerfilePath: ./Dockerfile
     dockerContext: .
     autoDeployTrigger: 'off'
     healthCheckPath: /api/v1/health
     numInstances: 1
     maxShutdownDelaySeconds: 30
-    # Migrations are a single approved Jenkins job using the migration image.
-    # Do not also configure a preDeployCommand or migrations in app startup.
+    # Free services have no pre-deploy commands or shell access.
+    # Apply migrations once from a verified external target, not app startup.
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: '10000'
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: kirana-identity-preview
+          property: connectionString
       - key: JWT_PUBLIC_KEY
         sync: false
       - key: JWT_PRIVATE_KEY
         sync: false
       - key: JWT_ISSUER
-        sync: false
+        value: kirana-identity
       - key: JWT_AUDIENCE
-        sync: false
+        value: kirana-api
       - key: MAIL_TRANSPORT
-        value: smtp
+        value: resend
+      - key: AUTH_EMAIL_MODE
+        # No frontend is deployed yet; enter emailed codes in the documented API.
+        value: code
       - key: EMAIL_FROM
-        sync: false
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        value: '587'
-      - key: SMTP_SECURE
-        value: 'false'
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: VERIFY_EMAIL_URL
-        sync: false
-      - key: RESET_PASSWORD_URL
+        # Test sender: can send only to the Resend account owner's address.
+        # Replace with a verified-domain sender before inviting other people.
+        value: onboarding@resend.dev
+      - key: RESEND_API_KEY
         sync: false

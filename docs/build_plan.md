@@ -116,6 +116,8 @@ Completed 2026-10-16. Milestones 5 and 6 use the existing schema without a migra
 
 ## Milestone 7 ? Docker, Jenkins and Render readiness
 
+**Free Render preview (user-approved 2026-11-02):** use Nitesh's workspace, a free Docker web service and free PostgreSQL 17 in Singapore. Node 24 LTS is approved and configured in application/agent images, CI and the retained Jenkins check. `render.yaml` now describes preview resources and private database wiring. Resend HTTPS transport supports verification, recovery and invitations because Render free blocks the configured SMTP ports; its test sender supports only the Resend account owner's email until a domain is verified. Since the frontend is not deployed, explicit `AUTH_EMAIL_MODE=code` sends the existing one-time tokens in email text for API entry; default link mode still requires safe frontend URLs. Private provider credentials, matching preview RSA keys, reviewed initialization of the new empty database, repository publication and verified live deployment remain required. Free PostgreSQL expires in 30 days and has no managed backups; this preview must not hold production data. No schema or migration SQL changes accompany this work. Production release gates below remain separate.
+
 **CI direction (2026-11-02):** Jenkins setup is deferred at the user's request. The active CI definition is `.github/workflows/CI.yml`, using GitHub-hosted Ubuntu runners for pushes, pull requests and manual runs. It performs the existing quality/test/build/container-smoke checks using only a dedicated test database. Jenkins release automation is retained for future work; GitHub Actions does not deploy or use production credentials. No schema, migration or dependency-major changes are required.
 
 - [x] Add GitHub Actions CI with npm lockfile installation, Prisma validation/generation, lint/types, unit/operations/HTTP/integration tests, application and Docker builds, and runtime smoke.
@@ -131,7 +133,7 @@ Local CI-definition validation (2026-11-02): `npm ci`, Prisma 6.19 validation/ge
 - [x] Readiness/local container smoke and guarded exact-commit deployment watcher implemented; backup/release/rollback procedures documented.
 - [x] .env.example and README updated with local commands, endpoint references and production configuration/approval requirements.
 - [ ] Execute the full Jenkins Pipeline from a reviewed commit on the configured Linux agent and retain CI evidence.
-- [ ] Resolve the preserved EOL Node 20 runtime with the required major-upgrade approval and validation before production use.
+- [ ] Complete hosted CI, Linux image/integration and release validation for the approved Node 24 LTS upgrade before production use. Configuration and local Node 24 checks are implemented; this is not a live-production gate completion.
 - [ ] Execute the approved Render deployment and production smoke, retaining deploy-ID/commit/live evidence. Any new/updated paid service requires approval; free Render instances block current SMTP ports.
 
 Local implementation and validation completed 2026-10-16. **Overall milestone 7 remains pending the live exit gates above**, not marked deployed. Files, actual command results and outstanding requirements: [Milestone 7 verification](milestone-7-verification.md). Setup, credentials, backup/migration approval and rollback: [deployment runbook](deployment.md). No schema/migration or dependency changes.

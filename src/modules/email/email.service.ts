@@ -26,6 +26,13 @@ export class EmailService {
 
   sendPasswordReset(email: string, token: string): Promise<MailDelivery> {
     const session = this.config.getOrThrow<SessionConfig>('SESSION');
+    const mail = this.config.getOrThrow<MailConfig>('MAIL');
+    if (mail.authEmailMode === 'code')
+      return this.adapter.send({
+        to: email,
+        subject: 'Reset your Kirana password',
+        text: `Use this one-time password-reset code in the Kirana API:\n${token}\n\nThis code expires in ${session.resetTtlSeconds / 60} minutes. If you did not request this, ignore this email.`,
+      });
     const url = new URL(session.resetUrl);
     url.searchParams.set('token', token);
     return this.adapter.send({
@@ -37,6 +44,12 @@ export class EmailService {
 
   sendVerification(email: string, token: string): Promise<MailDelivery> {
     const mail = this.config.getOrThrow<MailConfig>('MAIL');
+    if (mail.authEmailMode === 'code')
+      return this.adapter.send({
+        to: email,
+        subject: 'Verify your Kirana email',
+        text: `Use this one-time verification code in the Kirana API:\n${token}\n\nThis code expires in ${mail.verificationTtlSeconds / 3600} hours. If you did not create this account, ignore this email.`,
+      });
     const url = new URL(mail.verifyEmailUrl);
     url.searchParams.set('token', token);
     return this.adapter.send({

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# Preserve the repository's Node 20 major. Pin an approved digest for releases.
-ARG NODE_IMAGE=node:20-bookworm-slim
+# Node 24 LTS upgrade approved for the Render preview. Pin a digest for releases.
+ARG NODE_IMAGE=node:24-bookworm-slim
 FROM ${NODE_IMAGE} AS base
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*

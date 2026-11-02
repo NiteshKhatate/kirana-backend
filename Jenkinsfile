@@ -1,5 +1,5 @@
 pipeline {
-  // Dedicated Linux executor: repository-approved Node 20, npm, Docker + Compose.
+  // Dedicated Linux executor: repository-approved Node 24, npm, Docker + Compose.
   agent { label 'kirana-backend-ci' }
   options {
     skipDefaultCheckout(true)
@@ -23,7 +23,7 @@ pipeline {
       steps {
         checkout scm
         script { env.RELEASE_SHA = sh(script: 'git rev-parse HEAD', returnStdout: true).trim() }
-        sh 'node -e "if(process.versions.node.split(\".\")[0] !== \"20\") process.exit(1)"'
+        sh 'node -e "if(process.versions.node.split(\".\")[0] !== \"24\") process.exit(1)"'
         sh 'docker version && docker compose version'
       }
     }

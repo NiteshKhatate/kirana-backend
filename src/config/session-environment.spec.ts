@@ -55,6 +55,22 @@ describe('Signing, rotation and recovery configuration', () => {
       validateSessionEnvironment({ ...input(), ...values }, 'test', jwt()),
     ).toThrow('Invalid configuration:');
   });
+  it('allows reset codes without a frontend while still requiring signing keys', () => {
+    expect(
+      validateSessionEnvironment(
+        { ...input(), RESET_PASSWORD_URL: undefined, AUTH_EMAIL_MODE: 'code' },
+        'production',
+        jwt(),
+      ).resetUrl,
+    ).toBe('');
+    expect(() =>
+      validateSessionEnvironment(
+        { AUTH_EMAIL_MODE: 'code' },
+        'production',
+        jwt(),
+      ),
+    ).toThrow('JWT_PRIVATE_KEY');
+  });
   it('accepts a previous key by kid and rejects unknown or removed kids', () => {
     const current = generateKeyPairSync('rsa', { modulusLength: 2048 });
     const config = validateJwtEnvironment(

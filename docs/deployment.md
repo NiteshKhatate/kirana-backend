@@ -1,12 +1,14 @@
 # Docker, Jenkins and Render runbook
 
+**Current target:** the user approved a free preview in Nitesh's workspace and Node 24 LTS. Follow [Render free preview](render-preview.md). `render.yaml` now describes the free preview plus PostgreSQL and Resend HTTPS email. The production release procedures below remain separate; no paid provisioning or production deployment is implied.
+
 One NestJS process and Prisma client serve identity and tenant modules using `kirana_identity`. `kirana_tenant` remains unused. These files prepare deployment; a local build is not evidence that a Jenkins controller or Render release actually ran. See [Milestone 7 verification](milestone-7-verification.md) for executed versus pending gates.
 
 ## Runtime decision
 
-The Dockerfile and Jenkins agent check preserve Node **20**, the repository's existing major. The image uses Debian Bookworm, OpenSSL and the Linux-generated Prisma 6.19.0 client; native Argon2 bindings are installed on Linux rather than copied from Windows. `NODE_IMAGE` can pin a reviewed base-image digest. A release should pin the digest and retain its image/commit evidence.
+The Dockerfile, GitHub Actions and retained Jenkins agent use the user-approved Node **24 LTS** major. The image uses Debian Bookworm, OpenSSL and the Linux-generated Prisma 6.19.0 client; native Argon2 bindings are installed on Linux rather than copied from Windows. `NODE_IMAGE` can pin a reviewed base-image digest. A release should pin the digest and retain its image/commit evidence.
 
-Node 20 is now out of maintenance according to the [official lifecycle page](https://nodejs.org/en/about/eol). AGENTS.md prohibits unapproved major upgrades. Approve and validate a supported Node major before production use; no major was silently upgraded here. Existing application dependency majors and npm lockfile remain unchanged. The existing npm advisory findings also require separate review; no automatic audit fix is part of this milestone.
+Node 20 is out of maintenance according to the [official lifecycle page](https://nodejs.org/en/about/eol). The Node 24 upgrade was explicitly approved; retain actual Node 24 test/build evidence before release. Application dependency majors and the npm lockfile remain unchanged. Existing dependency advisories require separate review; no automatic audit fix is included.
 
 ## Local Compose
 
@@ -59,7 +61,7 @@ For local uncommitted testing the Dockerfile accepts `BUILD_SHA=unknown`. A migr
 
 For free local learning with the existing Docker Desktop controller, use [local Jenkins setup](jenkins-local.md). It prepares a separate Linux agent and isolated CI Docker daemon and keeps production deployment disabled.
 
-Use a protected multibranch Pipeline and the repository's `Jenkinsfile`, with a dedicated trusted Linux agent labeled `kirana-backend-ci`. Required: approved Node 20/npm versions, Docker Engine/Compose, Git, and Jenkins Pipeline, Git, Credentials Binding and Lockable Resources plugins. After the approved runtime-major change, update the agent check and base image together. Do not expose production credentials to untrusted PR Jenkinsfiles, shared agents, shell tracing, or arbitrary build parameters. Only protected main builds may enter deployment; non-main/PR builds never bind deployment secrets.
+Use a protected multibranch Pipeline and the repository's `Jenkinsfile`, with a dedicated trusted Linux agent labeled `kirana-backend-ci`. Required: approved Node 24/npm versions, Docker Engine/Compose, Git, and Jenkins Pipeline, Git, Credentials Binding and Lockable Resources plugins. Rebuild the agent image after the approved runtime-major change. Do not expose production credentials to untrusted PR Jenkinsfiles, shared agents, shell tracing, or arbitrary build parameters. Only protected main builds may enter deployment; non-main/PR builds never bind deployment secrets.
 
 Stages: checkout → `npm ci` → Prisma validate/generate → non-mutating lint/typecheck → unit/operations/HTTP tests → verified dedicated PostgreSQL integration → production build → both Docker targets → runtime-image smoke. Lockable Resources serialize loopback test port 5434 across jobs, and a separate release lock serializes migration/deploy jobs. Existing test configuration/volumes are preserved. No CI step truncates databases or removes volumes.
 
@@ -81,7 +83,7 @@ The release step performs a read-only Render preflight, runs the approved migrat
 
 ## Render service and runtime configuration
 
-`render.yaml` describes a Docker web service with one instance, readiness `/api/v1/health`, auto-deploys **off**, and no database provisioning. The manifest selects the **paid Starter plan** because [free Render services block SMTP ports 25/465/587](https://render.com/docs/free), which the current mail adapter requires. No paid resource was created or upgraded. Review the existing service's plan, name, region, limits and billing before importing; provisioning/upgrading a paid resource requires user approval. Importing a Blueprint can cause an initial deployment, so do not import it before the credential/runtime/migration review. Existing services must use the reviewed configuration; avoid competing dashboard auto-deploys.
+The current `render.yaml` describes the approved **free preview** web service and PostgreSQL database, with readiness `/api/v1/health`, auto-deploys **off**, and Resend HTTPS email. See [preview instructions](render-preview.md) for limitations and initial migrations. The remaining production requirements in this section describe a separate future release; do not run the production deploy watcher against the free preview or change it to a paid plan without approval. Importing a Blueprint can start its initial deployment, so complete the credential/runtime/migration review first.
 
 Required process env vars (all examples are placeholders):
 
@@ -91,9 +93,11 @@ Required process env vars (all examples are placeholders):
 | `DATABASE_URL` | Existing managed PostgreSQL `kirana_identity` connection, private runtime credential |
 | `JWT_PUBLIC_KEY`, `JWT_PRIVATE_KEY` | Matching RSA PEMs ≥2048 bits, escaped newlines accepted; never use local-key fallback |
 | `JWT_ISSUER`, `JWT_AUDIENCE` | Explicit identity/API values |
-| `MAIL_TRANSPORT`, `EMAIL_FROM` | `smtp`, real sender |
+| `MAIL_TRANSPORT`, `EMAIL_FROM` | `smtp` or `resend`, appropriate provider sender |
+| `RESEND_API_KEY` | Private sending key when using Resend HTTPS |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` | Existing provider, implicit TLS or required STARTTLS; no credentials in Git |
-| `VERIFY_EMAIL_URL`, `RESET_PASSWORD_URL` | HTTPS frontend URLs without credentials, query or fragment |
+| `AUTH_EMAIL_MODE` | Defaults to `link`; explicit `code` supports backend-only preview API entry |
+| `VERIFY_EMAIL_URL`, `RESET_PASSWORD_URL` | Real HTTPS frontend URLs without credentials, query or fragment in link mode |
 
 Optional validated settings: `JWT_KEY_ID`, `JWT_PREVIOUS_PUBLIC_KEYS`, access TTL 60–900 seconds, refresh TTL 300–2592000, reset TTL 300–3600, invitation TTL 300–604800, verification TTL 300–86400, resend cooldown 60–3600. See `.env.example`. Never put deploy hook/API key/migration-approval flags in application env vars. No wildcard credentialed CORS is enabled. The separate frontend still needs the documented BFF/cookie/CSRF implementation. Limits are process-local, so keep one instance until shared limiter/trusted proxy behavior is designed; a proxy's peer IP may concentrate traffic.
 

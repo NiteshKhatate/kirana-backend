@@ -35,6 +35,8 @@ export class InvitationResponseDto {
 export class IssueInvitationResponseDto {
   @ApiProperty({ type: InvitationResponseDto })
   invitation: InvitationResponseDto;
-  @ApiProperty({ enum: ['development-outbox', 'smtp-accepted', 'failed'] })
+  @ApiProperty({
+    enum: ['development-outbox', 'smtp-accepted', 'resend-accepted', 'failed'],
+  })
   emailDelivery: string;
 }

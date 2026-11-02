@@ -2,6 +2,7 @@ import { createPrivateKey, createPublicKey, KeyObject } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { JwtConfig } from './jwt-environment';
+import { validateAuthEmailMode } from './mail-environment';
 
 export interface SessionConfig {
   privateKey: KeyObject | null;
@@ -16,6 +17,7 @@ export function validateSessionEnvironment(
   jwt: JwtConfig,
 ): SessionConfig {
   const invalid = new Set<string>();
+  const authEmailMode = validateAuthEmailMode(input);
   let privateKey: KeyObject | null = null;
   let raw = input.JWT_PRIVATE_KEY;
   try {
@@ -59,21 +61,25 @@ export function validateSessionEnvironment(
   );
   const resetUrl =
     input.RESET_PASSWORD_URL ??
-    (mode === 'production' ? '' : 'http://localhost:3000/reset-password');
+    (authEmailMode === 'code' || mode === 'production'
+      ? ''
+      : 'http://localhost:3000/reset-password');
   try {
     if (typeof resetUrl !== 'string') throw new Error();
-    const url = new URL(resetUrl);
-    if (
-      !['http:', 'https:'].includes(url.protocol) ||
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      (mode === 'production' &&
-        (url.protocol !== 'https:' ||
-          ['localhost', '127.0.0.1'].includes(url.hostname)))
-    )
-      throw new Error();
+    if (authEmailMode !== 'code' || resetUrl) {
+      const url = new URL(resetUrl);
+      if (
+        !['http:', 'https:'].includes(url.protocol) ||
+        url.username ||
+        url.password ||
+        url.search ||
+        url.hash ||
+        (mode === 'production' &&
+          (url.protocol !== 'https:' ||
+            ['localhost', '127.0.0.1'].includes(url.hostname)))
+      )
+        throw new Error();
+    }
   } catch {
     invalid.add('RESET_PASSWORD_URL');
   }

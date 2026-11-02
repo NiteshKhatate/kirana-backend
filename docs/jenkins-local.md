@@ -4,9 +4,9 @@ This free learning setup adds a Linux build agent to the existing `kirana-jenkin
 
 Executed preparation checks are recorded in [local Jenkins verification](jenkins-local-verification.md); an authenticated node connection and actual Jenkins job remain separate steps.
 
-The controller schedules jobs. The agent supplies Java, Git, Node 20/npm, OpenSSL, Docker CLI, Compose and Buildx. A separate Docker-in-Docker daemon holds CI images and test PostgreSQL volumes. The agent shares its network namespace so the existing loopback-only test URL and Linux host-network smoke work without changing application safety checks. No Windows Docker socket or development database is mounted. The daemon is privileged; use this local agent only for your trusted repository, with no production credentials. Its socket is private and no Docker TCP port is published.
+The controller schedules jobs. The agent supplies Java, Git, Node 24/npm, OpenSSL, Docker CLI, Compose and Buildx. A separate Docker-in-Docker daemon holds CI images and test PostgreSQL volumes. The agent shares its network namespace so the existing loopback-only test URL and Linux host-network smoke work without changing application safety checks. No Windows Docker socket or development database is mounted. The daemon is privileged; use this local agent only for your trusted repository, with no production credentials. Its socket is private and no Docker TCP port is published.
 
-Node 20 is retained to match the current Jenkinsfile and application Dockerfile. This local learning environment does not resolve the separate supported-runtime release blocker. No dependency major, schema, existing migration or paid hosting setting is changed.
+Node 24 LTS was approved for the Render preview and now matches the Jenkinsfile and application Dockerfile. Rebuild the agent image before using the updated major; earlier verification records describe the old image. Jenkins setup remains deferred while GitHub Actions supplies CI. No application dependency major, schema or existing migration is changed.
 
 ## 1. Build and start the isolated Docker daemon
 

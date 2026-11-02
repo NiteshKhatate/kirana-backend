@@ -5,9 +5,9 @@ export class RegisterResponseDto {
   @ApiProperty({ type: PublicUserDto })
   user: PublicUserDto;
   @ApiProperty({
-    enum: ['development-outbox', 'smtp-accepted', 'failed'],
+    enum: ['development-outbox', 'smtp-accepted', 'resend-accepted', 'failed'],
     description:
-      'SMTP acceptance is not a guarantee of inbox delivery. Failed delivery preserves the account; use resend after the cooldown.',
+      'Email-provider acceptance is not a guarantee of inbox delivery. Failed delivery preserves the account; use resend after the cooldown.',
   })
   verificationEmailDelivery: string;
 }
